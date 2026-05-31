@@ -51,7 +51,6 @@ class DBStorage:
         Returns:
             dict: A dictionary keyed by <ClassName>.<id> mapping to objects.
         """
-        from models.base_model import BaseModel
         from models.user import User
         from models.state import State
         from models.city import City
@@ -60,7 +59,6 @@ class DBStorage:
         from models.review import Review
 
         classes = {
-            "BaseModel": BaseModel,
             "User": User,
             "State": State,
             "City": City,
