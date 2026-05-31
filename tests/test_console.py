@@ -164,11 +164,32 @@ class TestConsoleDoCreate(unittest.TestCase):
         storage.delete(place)
         storage.save()
 
+    @unittest.skipIf(
+        os.getenv("HBNB_TYPE_STORAGE") == "db",
+        "DBStorage requires non-null name for State"
+    )
     def test_create_returns_valid_id(self):
         """Test that create prints a valid UUID."""
         import uuid
         with patch("sys.stdout", new=StringIO()) as mock_out:
-            HBNBCommand().onecmd("create State")
+            HBNBCommand().onecmd('create State name="UUIDTest"')
+            obj_id = mock_out.getvalue().strip()
+        try:
+            uuid.UUID(obj_id)
+            valid = True
+        except ValueError:
+            valid = False
+        self.assertTrue(valid)
+        key = "State.{}".format(obj_id)
+        if key in storage.all():
+            storage.delete(storage.all()[key])
+            storage.save()
+
+    def test_create_returns_valid_id_db(self):
+        """Test that create with required params prints a valid UUID."""
+        import uuid
+        with patch("sys.stdout", new=StringIO()) as mock_out:
+            HBNBCommand().onecmd('create State name="UUIDTestDB"')
             obj_id = mock_out.getvalue().strip()
         try:
             uuid.UUID(obj_id)

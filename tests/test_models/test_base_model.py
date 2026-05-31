@@ -60,12 +60,31 @@ class TestBaseModel(unittest.TestCase):
         expected = "[BaseModel] ({}) {}".format(obj.id, obj.__dict__)
         self.assertEqual(str(obj), expected)
 
+    @unittest.skipIf(
+        os.getenv("HBNB_TYPE_STORAGE") == "db",
+        "BaseModel has no table; test via State for DBStorage"
+    )
     def test_save_updates_updated_at(self):
         """Test that save() updates the updated_at attribute."""
         obj = BaseModel()
         old_updated_at = obj.updated_at
         obj.save()
         self.assertGreaterEqual(obj.updated_at, old_updated_at)
+
+    @unittest.skipIf(
+        os.getenv("HBNB_TYPE_STORAGE") != "db",
+        "DBStorage-only: test save via a mapped subclass"
+    )
+    def test_save_updates_updated_at_db(self):
+        """Test that save() updates updated_at via a mapped subclass."""
+        from models.state import State
+        from models import storage
+        obj = State(name="SaveTest")
+        old_updated_at = obj.updated_at
+        obj.save()
+        self.assertGreaterEqual(obj.updated_at, old_updated_at)
+        storage.delete(obj)
+        storage.save()
 
     def test_kwargs_ignores_class_key(self):
         """Test that __class__ key in kwargs is ignored."""
